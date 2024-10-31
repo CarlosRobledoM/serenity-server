@@ -23,18 +23,33 @@ module.exports = {
     }
   },
 
-  async downloadFileToBucket(filename) {
+  async downloadFileToBucket(params) {
     const command = new GetObjectCommand({
-      Bucket: "transcribsession",
-      Key: `${filename}.json`,
+      Bucket: params.Bucket,
+      Key: params.Key,
     });
+    const speakerMapping = {
+      spk_0: "Spkr1",
+      spk_1: "Spkr2",
+    };
+
+    const formatConversation = (data) => {
+      const formattedConversation = [];
+      data.audio_segments.forEach((segment) => {
+        const speaker =
+          speakerMapping[segment.speaker_label] || segment.speaker_label;
+        formattedConversation.push(`${speaker}: ${segment.transcript}`);
+      });
+      return formattedConversation.join("\n");
+    };
 
     try {
       const response = await client.send(command);
       const str = await response.Body.transformToString();
       const json = JSON.parse(str);
-      const transcriptText = json.results.transcripts[0].transcript;
-      return transcriptText;
+      const conversation = formatConversation(json.results);
+      console.log("Conversación armada: ", conversation);
+      return conversation;
     } catch (error) {
       return error;
     }

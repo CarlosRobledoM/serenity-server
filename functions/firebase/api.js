@@ -9,7 +9,7 @@ const {
   doc,
 } = require("firebase/firestore");
 
-const collectionName = "frobledo818@gmail.com"; //"users" / "frobledo818@gmail.com"
+const collectionName = "users"; //"users" / "frobledo818@gmail.com"
 const subCollectionName = "sessions";
 
 module.exports = {
@@ -22,8 +22,11 @@ module.exports = {
     await deleteDoc(doc(myDB.db, collectionName, id));
   },
 
-  async updateItem(id, obj) {
-    await updateDoc(doc(myDB.db, collectionName, id), obj);
+  async updateItem(idUser, idSession, obj) {
+    await updateDoc(
+      doc(myDB.db, collectionName, idUser, subCollectionName, idSession),
+      obj
+    );
   },
 
   async getUsers() {
@@ -34,11 +37,11 @@ module.exports = {
     });
   },
 
-  async getSessions() {
+  async getSessions(idUser) {
     const itemsCollection = collection(
       myDB.db,
       collectionName,
-      "8ACso7Dydh9K81RQ2XxL",
+      idUser,
       subCollectionName
     );
     const result = await getDocs(query(itemsCollection));
